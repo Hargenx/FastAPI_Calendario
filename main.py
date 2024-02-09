@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from fastapi import FastAPI, Body, HTTPException
 from pydantic import BaseModel, validator
 
@@ -16,8 +16,20 @@ class DuracaoMinutos(BaseModel):
 class Consulta(BaseModel):
     nome: str
     data: datetime
-    hora: datetime
+    hora: time  # Alteração aqui
     duracao: DuracaoMinutos
+
+    @validator('data', pre=True, always=True)
+    def parse_data(cls, value):
+        if isinstance(value, str):
+            return datetime.strptime(value, "%d/%m/%Y")
+        return value
+
+    @validator('hora', pre=True, always=True)
+    def parse_hora(cls, value):
+        if isinstance(value, str):
+            return datetime.strptime(value, "%H:%M:%S").time()
+        return value
 
     @validator('data')
     def verifica_data(cls, v):
@@ -42,7 +54,7 @@ class Consulta(BaseModel):
     def consulta_hora_nao_passado(cls, v, values):
         if 'duracao' in values:
             # Acessar 'duracao' após a validação
-            fim_tempo = v + timedelta(minutes=values['duracao'].minutos)
+            fim_tempo = datetime.combine(datetime.utcnow(), v) + timedelta(minutes=values['duracao'].minutos)
             if fim_tempo <= datetime.utcnow():
                 raise ValueError("A consulta já passou")
 
@@ -62,7 +74,7 @@ async def agendar_consulta(body: Consulta = Body(...)):
         raise HTTPException(status_code=400, detail="Duração inválida")
 
     # Verificação de disponibilidade (substitua por lógica real)
-    if any(c.data == body.data and c.hora == body.hora for c in consultas):
+    if any(c['data'] == body.data and c['hora'] == body.hora for c in consultas):
         raise HTTPException(status_code=409, detail="Horário indisponível")
 
     # Persistir os dados em um banco de dados

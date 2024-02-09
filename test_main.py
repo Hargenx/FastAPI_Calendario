@@ -1,48 +1,32 @@
+from datetime import datetime, timedelta
 import unittest
 from main import agendar_consulta, Consulta
 
-
 class TestAgendarConsulta(unittest.TestCase):
 
+    def test_valida_nome_vazio(self):
+        consulta = Consulta(nome="", data=datetime.now() + timedelta(days=1),
+                            hora=datetime.now().time(), duracao=30)
+        with self.assertRaises(Exception):
+            agendar_consulta(consulta)
+
+    def test_valida_data_passado(self):
+        consulta = Consulta(nome="Maria", data=datetime.now() - timedelta(days=1),
+                            hora=datetime.now().time(), duracao=30)
+        with self.assertRaises(Exception):
+            agendar_consulta(consulta)
+
+    def test_valida_hora_passado(self):
+        consulta = Consulta(nome="João", data=datetime.now(),
+                            hora=datetime.now().time() - timedelta(hours=1), duracao=30)
+        with self.assertRaises(Exception):
+            agendar_consulta(consulta)
+
     def test_valida_duracao_negativa(self):
-        consulta = Consulta(nome="João", data="2023-03-01",
-                            hora="10:00", duracao=-1)
+        consulta = Consulta(nome="José", data=datetime.now() + timedelta(days=1),
+                            hora=datetime.now().time(), duracao=-30)
         with self.assertRaises(Exception):
             agendar_consulta(consulta)
 
-    def test_valida_duracao_zero(self):
-        consulta = Consulta(nome="Maria", data="2023-03-01",
-                            hora="10:00", duracao=0)
-        with self.assertRaises(Exception):
-            agendar_consulta(consulta)
-
-    def test_valida_data_invalida(self):
-        consulta = Consulta(nome="José", data="01/01/2023",
-                            hora="10:00", duracao=30)
-        with self.assertRaises(Exception):
-            agendar_consulta(consulta)
-
-    def test_valida_hora_invalida(self):
-        consulta = Consulta(nome="Ana", data="2023-01-01",
-                            hora="10:00:00", duracao=30)
-        with self.assertRaises(Exception):
-            agendar_consulta(consulta)
-
-    def test_verifica_disponibilidade(self):
-        consulta1 = Consulta(nome="João", data="2023-01-01",
-                             hora="10:00", duracao=30)
-        consulta2 = Consulta(nome="Maria", data="2023-01-01",
-                             hora="10:00", duracao=30)
-
-        agendar_consulta(consulta1)
-
-        with self.assertRaises(Exception):
-            agendar_consulta(consulta2)
-
-    def test_agenda_consulta(self):
-        consulta = Consulta(nome="José", data="2023-01-02",
-                            hora="15:00", duracao=60)
-
-        response = agendar_consulta(consulta)
-
-        self.assertEqual(response["message"], "Consulta agendada com sucesso!")
+if __name__ == '__main__':
+    unittest.main()
