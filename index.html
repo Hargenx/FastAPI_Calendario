@@ -2,10 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agendamento de Consulta</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -28,23 +27,23 @@
         <h1 class="mt-4">Agendamento de Consulta</h1>
 
         <form id="consultaForm">
-            <div class="form-group">
-                <label for="nome">Nome:</label>
+            <div class="mb-3">
+                <label for="nome" class="form-label">Nome:</label>
                 <input type="text" class="form-control" id="nome" required>
             </div>
 
-            <div class="form-group">
-                <label for="data">Data:</label>
-                <input type="text" class="form-control" id="data" placeholder="dd/mm/aaaa" required>
+            <div class="mb-3">
+                <label for="data" class="form-label">Data:</label>
+                <input type="date" class="form-control" id="data" required>
             </div>
 
-            <div class="form-group">
-                <label for="hora">Hora:</label>
-                <input type="text" class="form-control" id="hora" placeholder="hh:mm:ss" required>
+            <div class="mb-3">
+                <label for="hora" class="form-label">Hora:</label>
+                <input type="time" step="1" class="form-control" id="hora" required>
             </div>
 
-            <div class="form-group">
-                <label for="duracao">Duração (minutos):</label>
+            <div class="mb-3">
+                <label for="duracao" class="form-label">Duração (minutos):</label>
                 <input type="number" class="form-control" id="duracao" required>
             </div>
 
@@ -55,17 +54,17 @@
         <ul id="consultasList" class="list-group"></ul>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
 
     <script>
         async function agendarConsulta() {
             const nome = document.getElementById('nome').value;
-            const data = document.getElementById('data').value;
+            const data = formatarData(document.getElementById('data').value);
             const hora = document.getElementById('hora').value;
             const duracao = document.getElementById('duracao').value;
-
+            
             const response = await fetch('http://127.0.0.1:8000/consultas', {
                 method: 'POST',
                 headers: {
@@ -102,6 +101,11 @@
                 li.classList.add('list-group-item');
                 consultasList.appendChild(li);
             });
+        }
+
+        function formatarData(data) {
+            const [ano, mes, dia] = data.split('-');
+            return `${dia}/${mes}/${ano}`;
         }
 
         // Atualizar a lista de consultas ao carregar a página
