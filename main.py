@@ -1,8 +1,18 @@
 from datetime import datetime, timedelta, time
 from fastapi import FastAPI, Body, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, validator
 
 app = FastAPI()
+
+# Configuração CORS para permitir solicitações de qualquer origem (método simples)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class DuracaoMinutos(BaseModel):
     minutos: int

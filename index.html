@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendamento de Consulta</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: dimgray;
+        }
+
+        .container {
+            max-width: 600px;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-4">Agendamento de Consulta</h1>
+
+        <form id="consultaForm">
+            <div class="form-group">
+                <label for="nome">Nome:</label>
+                <input type="text" class="form-control" id="nome" required>
+            </div>
+
+            <div class="form-group">
+                <label for="data">Data:</label>
+                <input type="text" class="form-control" id="data" placeholder="dd/mm/aaaa" required>
+            </div>
+
+            <div class="form-group">
+                <label for="hora">Hora:</label>
+                <input type="text" class="form-control" id="hora" placeholder="hh:mm:ss" required>
+            </div>
+
+            <div class="form-group">
+                <label for="duracao">Duração (minutos):</label>
+                <input type="number" class="form-control" id="duracao" required>
+            </div>
+
+            <button type="button" class="btn btn-primary" onclick="agendarConsulta()">Agendar Consulta</button>
+        </form>
+
+        <h2 class="mt-4">Consultas Agendadas</h2>
+        <ul id="consultasList" class="list-group"></ul>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+    <script>
+        async function agendarConsulta() {
+            const nome = document.getElementById('nome').value;
+            const data = document.getElementById('data').value;
+            const hora = document.getElementById('hora').value;
+            const duracao = document.getElementById('duracao').value;
+
+            const response = await fetch('http://127.0.0.1:8000/consultas', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    nome,
+                    data,
+                    hora,
+                    duracao: { minutos: parseInt(duracao) },
+                }),
+            });
+
+            const result = await response.json();
+            alert(result.message);
+
+            // Atualizar a lista de consultas
+            listarConsultas();
+        }
+
+        async function listarConsultas() {
+            const response = await fetch('http://127.0.0.1:8000/consultas');
+            const consultas = await response.json();
+
+            const consultasList = document.getElementById('consultasList');
+            consultasList.innerHTML = '';
+
+            consultas.forEach((consulta) => {
+                const li = document.createElement('li');
+                const dataFormatada = new Date(consulta.data).toLocaleDateString();
+                const horaFormatada = new Date(`2000-01-01T${consulta.hora}`).toLocaleTimeString();
+
+                li.textContent = `${consulta.nome} - ${dataFormatada} - ${horaFormatada}`;
+                li.classList.add('list-group-item');
+                consultasList.appendChild(li);
+            });
+        }
+
+        // Atualizar a lista de consultas ao carregar a página
+        listarConsultas();
+    </script>
+</body>
+</html>
